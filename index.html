@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2563eb">
+  <title>Color Picker</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --selected-color: #2563eb;
+      --selected-rgb: 37, 99, 235;
+      --ink: #172033;
+      --muted: #677289;
+      --panel: rgba(255, 255, 255, 0.88);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 15%, rgba(var(--selected-rgb), 0.24), transparent 34%),
+        radial-gradient(circle at 85% 85%, rgba(var(--selected-rgb), 0.13), transparent 36%),
+        #f4f7fb;
+      transition: background 350ms ease;
+    }
+
+    main {
+      width: min(100%, 720px);
+      padding: clamp(24px, 5vw, 48px);
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 28px;
+      background: var(--panel);
+      box-shadow: 0 24px 70px rgba(23, 32, 51, 0.14);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--selected-color);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      transition: color 250ms ease;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 8vw, 4.25rem);
+      line-height: 1;
+      letter-spacing: -0.055em;
+    }
+
+    .intro {
+      max-width: 48ch;
+      margin: 16px 0 30px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .display {
+      min-height: 250px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 28px;
+      overflow: hidden;
+      border-radius: 22px;
+      color: white;
+      background: var(--selected-color);
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.28), 0 16px 32px rgba(var(--selected-rgb), 0.25);
+      transition: background 300ms ease, box-shadow 300ms ease, transform 180ms ease;
+    }
+
+    .display.changing {
+      transform: scale(0.985);
+    }
+
+    .display-label {
+      margin: 0 0 5px;
+      font-size: clamp(2rem, 7vw, 3.75rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.045em;
+    }
+
+    .display-value {
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .color-button {
+      position: relative;
+      aspect-ratio: 1;
+      min-width: 0;
+      cursor: pointer;
+      border: 0;
+      border-radius: 50%;
+      background: var(--color);
+      box-shadow: 0 7px 16px rgba(23, 32, 51, 0.16);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .color-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 11px 22px rgba(23, 32, 51, 0.2);
+    }
+
+    .color-button:active {
+      transform: translateY(-1px) scale(0.94);
+    }
+
+    .color-button:focus-visible {
+      outline: 3px solid var(--ink);
+      outline-offset: 4px;
+    }
+
+    .color-button[aria-pressed="true"]::after {
+      content: "✓";
+      position: absolute;
+      inset: 17%;
+      display: grid;
+      place-items: center;
+      border: 2px solid rgba(255, 255, 255, 0.82);
+      border-radius: 50%;
+      color: white;
+      font-size: clamp(0.85rem, 3vw, 1.4rem);
+      font-weight: 900;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+    }
+
+    .hint {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 0.87rem;
+      text-align: center;
+    }
+
+    @media (max-width: 540px) {
+      .controls {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        padding-inline: 18px;
+      }
+
+      .display {
+        min-height: 220px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Interactive palette</p>
+    <h1>Choose a color.</h1>
+    <p class="intro">Select a button to fill the display with a new color. The interface updates instantly to match your choice.</p>
+
+    <section class="display" id="colorDisplay" aria-live="polite" aria-label="Selected color: Blue">
+      <p class="display-label" id="colorName">Blue</p>
+      <p class="display-value" id="colorValue">#2563EB</p>
+    </section>
+
+    <div class="controls" aria-label="Choose a display color">
+      <button class="color-button" style="--color:#ef4444" data-name="Red" data-color="#EF4444" data-rgb="239, 68, 68" aria-label="Select red" aria-pressed="false"></button>
+      <button class="color-button" style="--color:#f97316" data-name="Orange" data-color="#F97316" data-rgb="249, 115, 22" aria-label="Select orange" aria-pressed="false"></button>
+      <button class="color-button" style="--color:#eab308" data-name="Yellow" data-color="#EAB308" data-rgb="234, 179, 8" aria-label="Select yellow" aria-pressed="false"></button>
+      <button class="color-button" style="--color:#16a34a" data-name="Green" data-color="#16A34A" data-rgb="22, 163, 74" aria-label="Select green" aria-pressed="false"></button>
+      <button class="color-button" style="--color:#2563eb" data-name="Blue" data-color="#2563EB" data-rgb="37, 99, 235" aria-label="Select blue" aria-pressed="true"></button>
+      <button class="color-button" style="--color:#9333ea" data-name="Purple" data-color="#9333EA" data-rgb="147, 51, 234" aria-label="Select purple" aria-pressed="false"></button>
+    </div>
+
+    <p class="hint">Tip: use Tab and Enter to select a color with your keyboard.</p>
+  </main>
+
+  <script>
+    const root = document.documentElement;
+    const display = document.querySelector("#colorDisplay");
+    const colorName = document.querySelector("#colorName");
+    const colorValue = document.querySelector("#colorValue");
+    const buttons = document.querySelectorAll(".color-button");
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const { name, color, rgb } = button.dataset;
+
+        root.style.setProperty("--selected-color", color);
+        root.style.setProperty("--selected-rgb", rgb);
+        colorName.textContent = name;
+        colorValue.textContent = color;
+        display.setAttribute("aria-label", `Selected color: ${name}`);
+
+        buttons.forEach((item) => {
+          item.setAttribute("aria-pressed", String(item === button));
+        });
+
+        display.classList.add("changing");
+        window.setTimeout(() => display.classList.remove("changing"), 180);
+      });
+    });
+  </script>
+</body>
+</html>
